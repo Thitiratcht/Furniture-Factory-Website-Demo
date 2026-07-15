@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bangkok Furniture Factory — Demo Website</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --wood:#8a5a33; --wood-dark:#5f3d20; --amber:#b45309; --cream:#faf6ef;
+    --ink:#2b2118; --grey:#7a6f63; --line:#e6ddd0; --ok:#2e7d32;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif; color:var(--ink); background:var(--cream);}
+  h2{font-size:1.6rem; margin-bottom:.4rem;}
+  h3{margin-bottom:.5rem;}
+  section{padding:56px 24px; max-width:1100px; margin:0 auto;}
+  .sub{color:var(--grey); margin-bottom:24px;}
+  .btn{display:inline-block; background:var(--amber); color:#fff; border:none; padding:10px 18px;
+       border-radius:8px; font-size:.95rem; cursor:pointer; text-decoration:none;}
+  .btn:hover{background:#92400e;}
+  .btn.ghost{background:#fff; color:var(--amber); border:1.5px solid var(--amber);}
+  .btn.small{padding:6px 12px; font-size:.85rem;}
+  /* NAV */
+  nav{position:sticky; top:0; z-index:50; background:#fffdf8ee; backdrop-filter:blur(6px);
+      border-bottom:1px solid var(--line); display:flex; gap:4px; align-items:center;
+      padding:10px 20px; flex-wrap:wrap;}
+  nav .logo{font-weight:800; color:var(--wood-dark); margin-right:auto; font-size:1.05rem;}
+  nav a{color:var(--ink); text-decoration:none; padding:6px 10px; border-radius:6px; font-size:.9rem;}
+  nav a:hover{background:var(--line);}
+  /* HERO */
+  .hero{background:linear-gradient(135deg,var(--wood-dark),var(--wood)); color:#fff; text-align:center;
+        padding:72px 24px;}
+  .hero h1{font-size:2.2rem; margin-bottom:12px;}
+  .hero p{opacity:.9; max-width:640px; margin:0 auto 24px;}
+  .badges{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:26px;}
+  .badge{background:#ffffff22; border:1px solid #ffffff44; padding:6px 14px; border-radius:999px; font-size:.85rem;}
+  /* PLANNER */
+  .planner-wrap{display:grid; grid-template-columns:230px 1fr; gap:16px;}
+  @media(max-width:800px){.planner-wrap{grid-template-columns:1fr;}}
+  .panel{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px;}
+  .panel h4{margin-bottom:10px; color:var(--wood-dark);}
+  .panel label{font-size:.82rem; color:var(--grey); display:block; margin-top:8px;}
+  .panel input[type=number]{width:100%; padding:6px; border:1px solid var(--line); border-radius:6px;}
+  .addbtns{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-top:10px;}
+  .addbtns button{padding:8px 4px; font-size:.8rem; border:1px solid var(--line); background:var(--cream);
+                  border-radius:8px; cursor:pointer;}
+  .addbtns button:hover{background:#f0e6d8;}
+  #plannerCanvas{width:100%; height:440px; border-radius:12px; background:#efe9df; display:block;
+                 border:1px solid var(--line); touch-action:none;}
+  .planner-toolbar{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; align-items:center;}
+  #selInfo{font-size:.85rem; color:var(--grey); margin-left:auto;}
+  /* CONFIGURATOR */
+  .config-wrap{display:grid; grid-template-columns:1fr 1fr; gap:24px;}
+  @media(max-width:800px){.config-wrap{grid-template-columns:1fr;}}
+  .swatches{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 4px;}
+  .swatch{width:34px; height:34px; border-radius:50%; cursor:pointer; border:3px solid transparent;}
+  .swatch.sel{border-color:var(--amber);}
+  select,.qtyin{padding:8px; border:1px solid var(--line); border-radius:8px; width:100%; background:#fff;}
+  .optrow{display:flex; align-items:center; gap:8px; font-size:.9rem; margin:4px 0;}
+  .price-big{font-size:1.8rem; font-weight:800; color:var(--wood-dark); margin:12px 0;}
+  #previewBox{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; text-align:center;}
+  /* QUOTE */
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;}
+  th,td{padding:10px 12px; border-bottom:1px solid var(--line); font-size:.9rem; text-align:left;}
+  th{background:#f3ead9;}
+  td.num,th.num{text-align:right;}
+  .qty-btn{border:1px solid var(--line); background:#fff; width:24px; height:24px; border-radius:6px; cursor:pointer;}
+  .totalbar{display:flex; justify-content:flex-end; gap:32px; padding:14px 6px; font-size:1.05rem;}
+  .note{font-size:.82rem; color:var(--grey); margin-top:8px;}
+  /* CATALOG */
+  .cat-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px;}
+  .cat-card{background:#fff; border:1px solid var(--line); border-radius:12px; padding:14px; text-align:center;}
+  .cat-card svg{width:100%; height:110px;}
+  .cat-card .nm{font-weight:700; margin-top:6px;}
+  .cat-card .pr{color:var(--amber); font-weight:700;}
+  /* FORM */
+  form .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:700px){form .grid2{grid-template-columns:1fr;}}
+  form label{font-size:.85rem; color:var(--grey); display:block; margin-bottom:4px; margin-top:12px;}
+  form input,form select,form textarea{width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; background:#fff; font-family:inherit;}
+  form textarea{min-height:100px;}
+  #formOk{display:none; background:#e8f5e9; border:1px solid #a5d6a7; color:var(--ok);
+          padding:14px; border-radius:10px; margin-top:14px;}
+  /* CHAT */
+  #chatBtn{position:fixed; right:20px; bottom:20px; z-index:60; background:var(--amber); color:#fff;
+           border:none; border-radius:999px; padding:14px 20px; font-size:1rem; cursor:pointer;
+           box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  #chatBox{position:fixed; right:20px; bottom:80px; z-index:60; width:320px; max-width:90vw; background:#fff;
+           border:1px solid var(--line); border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.2);
+           display:none; flex-direction:column; overflow:hidden;}
+  #chatBox.open{display:flex;}
+  #chatHead{background:var(--wood-dark); color:#fff; padding:12px 14px; font-weight:700;}
+  #chatMsgs{padding:12px; height:240px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;}
+  .msg{max-width:80%; padding:8px 12px; border-radius:12px; font-size:.88rem;}
+  .msg.bot{background:#f3ead9; align-self:flex-start;}
+  .msg.me{background:var(--amber); color:#fff; align-self:flex-end;}
+  #chatRow{display:flex; border-top:1px solid var(--line);}
+  #chatRow input{flex:1; border:none; padding:12px; font-size:.9rem; outline:none;}
+  #chatRow button{border:none; background:var(--wood-dark); color:#fff; padding:0 16px; cursor:pointer;}
+  .chat-links{display:flex; gap:8px; padding:8px 12px; border-top:1px solid var(--line);}
+  .chat-links a{font-size:.8rem; color:var(--amber); text-decoration:none;}
+  footer{background:var(--wood-dark); color:#fff; text-align:center; padding:26px; font-size:.85rem;}
+  .demo-tag{background:#fde68a; color:#7c4a03; text-align:center; padding:6px; font-size:.82rem;}
+  /* PRINT */
+  .print-only{display:none;}
+  @media print{
+    body.print-quote *{visibility:hidden;}
+    body.print-quote #printQuote,body.print-quote #printQuote *{visibility:visible; display:block;}
+    body.print-catalog *{visibility:hidden;}
+    body.print-catalog #printCatalog,body.print-catalog #printCatalog *{visibility:visible;}
+    #printQuote,#printCatalog{position:absolute; top:0; left:0; width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-tag">DEMO WEBSITE — placeholder products & prices. Built to show what the factory's site can do.</div>
+
+<nav>
+  <span class="logo">🪑 Bangkok Furniture Factory</span>
+  <a href="#planner">3D Room Planner</a>
+  <a href="#configurator">Customize</a>
+  <a href="#quote">Quotation</a>
+  <a href="#catalog">Catalog</a>
+  <a href="#inquiry">Project Inquiry</a>
+</nav>
+
+<div class="hero">
+  <h1>Factory-Direct Furniture, Made in Bangkok</h1>
+  <p>8,000 m² factory · custom sizes & fabrics · in-stock warehouse · free whole-house design.
+     Serving homes, hotels, guesthouses and offices across Thailand.</p>
+  <div class="badges">
+    <span class="badge">🏭 Source factory (no middleman)</span>
+    <span class="badge">📐 Custom size & fabric</span>
+    <span class="badge">🚚 Fast Bangkok delivery</span>
+    <span class="badge">🏨 Hotel & office projects</span>
+  </div>
+  <a class="btn" href="#planner">Try the 3D Room Planner</a>
+  <a class="btn ghost" href="#inquiry" style="margin-left:8px;">Request a Project Quote</a>
+</div>
+
+<!-- ============ 3D PLANNER ============ -->
+<section id="planner">
+  <h2>3D Room Planner</h2>
+  <p class="sub">Set your room size, add furniture, and drag pieces around to check the fit — just like planning your real condo or hotel room.</p>
+  <div class="planner-wrap">
+    <div class="panel">
+      <h4>Room</h4>
+      <label>Width (m)</label><input type="number" id="roomW" value="4" min="2" max="12" step="0.5">
+      <label>Depth (m)</label><input type="number" id="roomD" value="5" min="2" max="12" step="0.5">
+      <button class="btn small" style="margin-top:10px;" onclick="buildRoom()">Update room</button>
+      <h4 style="margin-top:16px;">Add furniture</h4>
+      <div class="addbtns">
+        <button onclick="addItem('sofa')">🛋 Sofa 2.0m</button>
+        <button onclick="addItem('sofaL')">🛋 L-Sofa 2.8m</button>
+        <button onclick="addItem('bed')">🛏 Bed Queen</button>
+        <button onclick="addItem('wardrobe')">🚪 Wardrobe</button>
+        <button onclick="addItem('desk')">🖥 Office desk</button>
+        <button onclick="addItem('chair')">💺 Chair</button>
+        <button onclick="addItem('table')">🪵 Coffee table</button>
+        <button onclick="addItem('rug')">🟫 Rug</button>
+      </div>
+    </div>
+    <div>
+      <canvas id="plannerCanvas"></canvas>
+      <div class="planner-toolbar">
+        <button class="btn small ghost" onclick="setView('3d')">3D view</button>
+        <button class="btn small ghost" onclick="setView('top')">Top view</button>
+        <button class="btn small ghost" onclick="rotateSel()">⟳ Rotate</button>
+        <button class="btn small ghost" onclick="deleteSel()">🗑 Delete</button>
+        <span id="selInfo">Click an item to select · drag to move · drag empty space to orbit</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONFIGURATOR ============ -->
+<section id="configurator" style="background:#fff; max-width:none;">
+  <div style="max-width:1100px; margin:0 auto;">
+  <h2>Furniture Customization</h2>
+  <p class="sub">Pick a model, fabric, and size — the price updates instantly. Every piece is made in our Bangkok factory.</p>
+  <div class="config-wrap">
+    <div id="previewBox">
+      <svg id="prevSvg" viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="prevName" style="font-weight:700; margin-top:8px;"></div>
+      <div id="prevDesc" style="font-size:.85rem; color:var(--grey);"></div>
+    </div>
+    <div>
+      <label style="font-size:.85rem; color:var(--grey);">Model</label>
+      <select id="cfgModel" onchange="cfgRender(true)"></select>
+      <label style="font-size:.85rem; color:var(--grey); display:block; margin-top:12px;">Size</label>
+      <select id="cfgSize" onchange="cfgRender()"></select>
+      <label style="font-size:.85rem; color:var(--grey); display:block; margin-top:12px;">Fabric / finish</label>
+      <div class="swatches" id="cfgSwatches"></div>
+      <div id="cfgFabricName" style="font-size:.85rem; color:var(--grey);"></div>
+      <div id="cfgOptions" style="margin-top:12px;"></div>
+      <div class="price-big" id="cfgPrice"></div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="number" id="cfgQty" class="qtyin" value="1" min="1" style="width:80px;">
+        <button class="btn" onclick="addToQuote()">Add to quotation →</button>
+      </div>
+      <p class="note">B2B pricing: 10+ pieces −10% · 30+ pieces −15% (applied automatically in the quote).</p>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ============ QUOTE ============ -->
+<section id="quote">
+  <h2>Online Quotation</h2>
+  <p class="sub">Your configured items appear here. Adjust quantities and download the quote — or send it to us for a formal offer.</p>
+  <table>
+    <thead><tr><th>Item</th><th>Specification</th><th class="num">Unit price</th><th>Qty</th><th class="num">Total</th><th></th></tr></thead>
+    <tbody id="quoteBody"><tr id="quoteEmpty"><td colspan="6" style="color:var(--grey);">No items yet — configure a product above and click “Add to quotation”.</td></tr></tbody>
+  </table>
+  <div class="totalbar">
+    <span id="qDiscount" style="color:var(--ok);"></span>
+    <strong id="qTotal">Total: ฿0</strong>
+  </div>
+  <button class="btn ghost" onclick="printQuote()">🖨 Download quote (PDF)</button>
+  <a class="btn" href="#inquiry" style="margin-left:8px;">Send to factory for formal offer</a>
+  <p class="note">Demo note: prices are placeholders. In production this connects to the factory's real price list.</p>
+</section>
+
+<!-- ============ CATALOG ============ -->
+<section id="catalog" style="background:#fff; max-width:none;">
+  <div style="max-width:1100px; margin:0 auto;">
+  <h2>Catalog</h2>
+  <p class="sub">Browse the range and download the full catalog as PDF.</p>
+  <div class="cat-grid" id="catGrid"></div>
+  <div style="margin-top:18px;">
+    <button class="btn" onclick="printCatalog()">⬇ Download full catalog (PDF)</button>
+  </div>
+  </div>
+</section>
+
+<!-- ============ INQUIRY ============ -->
+<section id="inquiry">
+  <h2>Project Inquiry</h2>
+  <p class="sub">Hotels, guesthouses, offices, renovation companies — send your project and get a free furnishing plan and factory-direct quote within 48 hours.</p>
+  <form onsubmit="return submitInquiry(event)">
+    <div class="grid2">
+      <div><label>Your name *</label><input required id="inqName"></div>
+      <div><label>Company (optional)</label><input></div>
+      <div><label>Phone / LINE ID *</label><input required></div>
+      <div><label>Email</label><input type="email"></div>
+      <div>
+        <label>Project type *</label>
+        <select required>
+          <option value="">— select —</option>
+          <option>Home / condo</option><option>Hotel / resort</option>
+          <option>Guesthouse / Airbnb</option><option>Office fit-out</option>
+          <option>Renovation contractor / designer</option><option>Other</option>
+        </select>
+      </div>
+      <div><label>Number of rooms / pieces</label><input placeholder="e.g. 12 rooms, 40 chairs"></div>
+      <div><label>Budget range (฿)</label>
+        <select><option>Under 100,000</option><option>100,000 – 500,000</option>
+        <option>500,000 – 2,000,000</option><option>Over 2,000,000</option></select></div>
+      <div><label>Floor plan / reference (optional)</label><input type="file"></div>
+    </div>
+    <label>Tell us about the project</label>
+    <textarea placeholder="Style, deadline, special requirements…"></textarea>
+    <div style="margin-top:16px;"><button class="btn" type="submit">Send inquiry</button></div>
+    <div id="formOk">✅ Thank you! Your inquiry was received (demo). In production this is sent instantly to the factory's LINE OA and email, and our design team replies within 48 hours.</div>
+  </form>
+</section>
+
+<footer>
+  Bangkok Furniture Factory (demo) · Office & upholstered furniture · Factory-direct, custom, whole-house solutions<br>
+  Demo built to showcase: 3D Room Planner · Customization · Online Quotation · Catalog Download · Live Chat · Project Inquiry
+</footer>
+
+<!-- CHAT -->
+<button id="chatBtn" onclick="toggleChat()">💬 Chat</button>
+<div id="chatBox">
+  <div id="chatHead">Live chat — we reply fast</div>
+  <div id="chatMsgs">
+    <div class="msg bot">สวัสดีค่ะ 👋 Welcome to Bangkok Furniture Factory. How can we help — custom sofa, hotel project, or a quote?</div>
+  </div>
+  <div id="chatRow">
+    <input id="chatInput" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">➤</button>
+  </div>
+  <div class="chat-links">
+    <a href="#" onclick="return false;">📱 Continue in LINE</a>
+    <a href="#" onclick="return false;">💬 Messenger</a>
+    <span style="font-size:.75rem; color:var(--grey); margin-left:auto;">demo bot</span>
+  </div>
+</div>
+
+<!-- PRINT AREAS -->
+<div id="printQuote" class="print-only"></div>
+<div id="printCatalog" class="print-only"></div>
+
+<script>
+/* ================= PRODUCT DATA ================= */
+const FABRICS = [
+  {n:'Beige Linen', c:'#d8c9a8', mod:0},
+  {n:'Charcoal Weave', c:'#4a4a4a', mod:0},
+  {n:'Terracotta', c:'#c96f4a', mod:500},
+  {n:'Navy Tech Fabric', c:'#33415c', mod:1200},
+  {n:'Ivory Leather', c:'#e8e0d0', mod:3500},
+  {n:'Caramel Leather', c:'#a9713d', mod:3500},
+];
+const PRODUCTS = [
+  {id:'p1', name:'Electric Recliner Sofa', desc:'Motorized recline, silent motor', base:28900, kind:'sofa',
+   sizes:[['2-seat · 180 cm',0],['3-seat · 220 cm',6000],['L-shape · 280 cm',14000]],
+   options:[['USB charging port',900],['Massage module',4500]]},
+  {id:'p2', name:'Italian Minimal Sofa', desc:'Slim frame, feather-blend cushions', base:19900, kind:'sofa',
+   sizes:[['2-seat · 170 cm',0],['3-seat · 210 cm',5000],['L-shape · 270 cm',12000]],
+   options:[['Contrast piping',800],['Stain-guard fabric',1500]]},
+  {id:'p3', name:'Multifunction Sofa Bed', desc:'Sofa by day, bed by night — condo hero', base:14900, kind:'sofa',
+   sizes:[['Width 160 cm',0],['Width 180 cm',2000]],
+   options:[['Hidden storage',1200],['Washable cover',900]]},
+  {id:'p4', name:'Quiet Soft Bed', desc:'Silent frame, upholstered headboard', base:22900, kind:'bed',
+   sizes:[['Queen 5 ft',0],['King 6 ft',4000]],
+   options:[['Under-bed storage',2500],['USB headboard',900]]},
+  {id:'p5', name:'Executive Office Desk', desc:'In stock — 7-day office fit-out', base:9900, kind:'desk',
+   sizes:[['140 cm',0],['160 cm',1200],['180 cm',2400]],
+   options:[['Cable tray',500],['Mobile pedestal',1900]]},
+  {id:'p6', name:'Ergonomic Office Chair', desc:'Lumbar support, bulk stock ready', base:4900, kind:'chair',
+   sizes:[['Standard',0],['High-back',800]],
+   options:[['Headrest',600],['Footrest',700]]},
+];
+const fmt = n => '฿' + n.toLocaleString('en-US');
+
+/* ================= CONFIGURATOR ================= */
+let cfgFab = 0, cfgOpts = new Set();
+const mSel = document.getElementById('cfgModel');
+PRODUCTS.forEach((p,i)=>{ const o=document.createElement('option'); o.value=i; o.textContent=p.name+' — from '+fmt(p.base); mSel.appendChild(o); });
+
+function drawPreview(kind, color){
+  const dark = '#3a2c1c', wood='#8a5a33';
+  let s='';
+  if(kind==='sofa'){
+    s=`<rect x="30" y="70" width="240" height="55" rx="12" fill="${color}"/>
+       <rect x="30" y="40" width="240" height="45" rx="12" fill="${color}" opacity=".85"/>
+       <rect x="18" y="60" width="26" height="65" rx="10" fill="${color}" opacity=".95"/>
+       <rect x="256" y="60" width="26" height="65" rx="10" fill="${color}" opacity=".95"/>
+       <rect x="45" y="125" width="14" height="18" fill="${dark}"/><rect x="240" y="125" width="14" height="18" fill="${dark}"/>
+       <rect x="95" y="78" width="52" height="34" rx="8" fill="#00000018"/><rect x="155" y="78" width="52" height="34" rx="8" fill="#00000018"/>`;
+  } else if(kind==='bed'){
+    s=`<rect x="30" y="35" width="240" height="30" rx="8" fill="${color}"/>
+       <rect x="30" y="65" width="240" height="60" rx="6" fill="#f2ede4" stroke="${color}" stroke-width="3"/>
+       <rect x="45" y="72" width="70" height="24" rx="8" fill="#fff" stroke="#d9cfc0"/>
+       <rect x="125" y="72" width="70" height="24" rx="8" fill="#fff" stroke="#d9cfc0"/>
+       <rect x="30" y="118" width="240" height="14" rx="4" fill="${color}" opacity=".8"/>
+       <rect x="40" y="132" width="12" height="12" fill="${dark}"/><rect x="248" y="132" width="12" height="12" fill="${dark}"/>`;
+  } else if(kind==='desk'){
+    s=`<rect x="30" y="60" width="240" height="16" rx="4" fill="${wood}"/>
+       <rect x="40" y="76" width="12" height="60" fill="${dark}"/><rect x="248" y="76" width="12" height="60" fill="${dark}"/>
+       <rect x="180" y="76" width="70" height="46" rx="4" fill="${color}"/>
+       <rect x="188" y="84" width="54" height="8" rx="3" fill="#00000022"/><rect x="188" y="98" width="54" height="8" rx="3" fill="#00000022"/>`;
+  } else {
+    s=`<rect x="120" y="30" width="60" height="55" rx="10" fill="${color}"/>
+       <rect x="112" y="85" width="76" height="18" rx="8" fill="${color}" opacity=".9"/>
+       <rect x="146" y="103" width="8" height="28" fill="${dark}"/>
+       <path d="M150 131 L110 150 M150 131 L190 150 M150 131 L130 155 M150 131 L170 155" stroke="${dark}" stroke-width="5" fill="none"/>`;
+  }
+  return s;
+}
+
+function cfgRender(modelChanged){
+  const p = PRODUCTS[mSel.value];
+  const sizeSel = document.getElementById('cfgSize');
+  if(modelChanged===true || sizeSel.options.length===0){
+    sizeSel.innerHTML='';
+    p.sizes.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=s[0]+(s[1]?' (+'+fmt(s[1])+')':'');sizeSel.appendChild(o);});
+    cfgOpts = new Set();
+    const ob = document.getElementById('cfgOptions'); ob.innerHTML='<label style="font-size:.85rem;color:var(--grey);">Options</label>';
+    p.options.forEach((op,i)=>{
+      const r=document.createElement('div'); r.className='optrow';
+      r.innerHTML=`<input type="checkbox" id="op${i}" onchange="toggleOpt(${i})"> <label for="op${i}" style="margin:0;color:var(--ink);font-size:.9rem;">${op[0]} (+${fmt(op[1])})</label>`;
+      ob.appendChild(r);
+    });
+  }
+  const sw = document.getElementById('cfgSwatches'); sw.innerHTML='';
+  FABRICS.forEach((f,i)=>{
+    const d=document.createElement('div'); d.className='swatch'+(i===cfgFab?' sel':''); d.style.background=f.c;
+    d.title=f.n; d.onclick=()=>{cfgFab=i; cfgRender();}; sw.appendChild(d);
+  });
+  document.getElementById('cfgFabricName').textContent = FABRICS[cfgFab].n + (FABRICS[cfgFab].mod? ' (+'+fmt(FABRICS[cfgFab].mod)+')':'');
+  let price = p.base + p.sizes[sizeSel.value][1] + FABRICS[cfgFab].mod;
+  cfgOpts.forEach(i=> price += p.options[i][1]);
+  document.getElementById('cfgPrice').textContent = fmt(price);
+  document.getElementById('prevSvg').innerHTML = drawPreview(p.kind, FABRICS[cfgFab].c);
+  document.getElementById('prevName').textContent = p.name;
+  document.getElementById('prevDesc').textContent = p.desc;
+}
+function toggleOpt(i){ cfgOpts.has(i)?cfgOpts.delete(i):cfgOpts.add(i); cfgRender(); }
+
+/* ================= QUOTE ================= */
+let quote = [];
+function addToQuote(){
+  const p = PRODUCTS[mSel.value];
+  const sizeIdx = document.getElementById('cfgSize').value;
+  const opts = [...cfgOpts].map(i=>p.options[i][0]);
+  let unit = p.base + p.sizes[sizeIdx][1] + FABRICS[cfgFab].mod;
+  cfgOpts.forEach(i=> unit += p.options[i][1]);
+  const qty = Math.max(1, parseInt(document.getElementById('cfgQty').value)||1);
+  quote.push({name:p.name, spec:p.sizes[sizeIdx][0]+' · '+FABRICS[cfgFab].n+(opts.length?' · '+opts.join(', '):''), unit, qty});
+  renderQuote();
+  document.getElementById('quote').scrollIntoView({behavior:'smooth'});
+}
+function renderQuote(){
+  const tb = document.getElementById('quoteBody'); tb.innerHTML='';
+  if(quote.length===0){ tb.innerHTML='<tr><td colspan="6" style="color:var(--grey);">No items yet — configure a product above and click “Add to quotation”.</td></tr>'; }
+  let subtotal=0, pieces=0;
+  quote.forEach((it,i)=>{
+    subtotal += it.unit*it.qty; pieces += it.qty;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>${it.name}</strong></td><td style="font-size:.82rem;color:var(--grey);">${it.spec}</td>
+      <td class="num">${fmt(it.unit)}</td>
+      <td><button class="qty-btn" onclick="chgQty(${i},-1)">−</button> ${it.qty} <button class="qty-btn" onclick="chgQty(${i},1)">+</button></td>
+      <td class="num">${fmt(it.unit*it.qty)}</td>
+      <td><button class="qty-btn" onclick="delQuote(${i})">✕</button></td>`;
+    tb.appendChild(tr);
+  });
+  let disc = pieces>=30?0.15 : pieces>=10?0.10 : 0;
+  document.getElementById('qDiscount').textContent = disc? `B2B discount −${disc*100}% (${pieces} pieces): −${fmt(Math.round(subtotal*disc))}` : '';
+  document.getElementById('qTotal').textContent = 'Total: '+fmt(Math.round(subtotal*(1-disc)));
+}
+function chgQty(i,d){ quote[i].qty=Math.max(1,quote[i].qty+d); renderQuote(); }
+function delQuote(i){ quote.splice(i,1); renderQuote(); }
+function printQuote(){
+  if(quote.length===0){ alert('Add at least one item to the quote first.'); return; }
+  let subtotal=0,pieces=0; quote.forEach(it=>{subtotal+=it.unit*it.qty;pieces+=it.qty;});
+  const disc = pieces>=30?0.15:pieces>=10?0.10:0;
+  let rows = quote.map(it=>`<tr><td>${it.name}</td><td>${it.spec}</td><td style="text-align:right">${fmt(it.unit)}</td><td style="text-align:center">${it.qty}</td><td style="text-align:right">${fmt(it.unit*it.qty)}</td></tr>`).join('');
+  document.getElementById('printQuote').innerHTML = `
+    <h1 style="color:#5f3d20">Bangkok Furniture Factory — Quotation (Demo)</h1>
+    <p>Date: ${new Date().toLocaleDateString()} · Valid 14 days · Factory-direct pricing</p>
+    <table border="1" cellspacing="0" cellpadding="8" style="border-collapse:collapse;width:100%;margin-top:12px;">
+      <tr style="background:#f3ead9"><th>Item</th><th>Specification</th><th>Unit</th><th>Qty</th><th>Total</th></tr>${rows}
+    </table>
+    <h3 style="margin-top:14px;">${disc?`B2B discount −${disc*100}% applied · `:''}Grand total: ${fmt(Math.round(subtotal*(1-disc)))}</h3>
+    <p style="font-size:12px;color:#666;">Demo document. Production version includes company details, tax ID, delivery terms and payment schedule.</p>`;
+  document.body.classList.add('print-quote'); window.print(); document.body.classList.remove('print-quote');
+}
+
+/* ================= CATALOG ================= */
+function renderCatalog(){
+  const g=document.getElementById('catGrid');
+  PRODUCTS.forEach(p=>{
+    const d=document.createElement('div'); d.className='cat-card';
+    d.innerHTML=`<svg viewBox="0 0 300 170">${drawPreview(p.kind,'#c9a87c')}</svg>
+      <div class="nm">${p.name}</div><div style="font-size:.8rem;color:var(--grey);">${p.desc}</div>
+      <div class="pr">from ${fmt(p.base)}</div>`;
+    g.appendChild(d);
+  });
+}
+function printCatalog(){
+  let cards = PRODUCTS.map(p=>`
+    <div style="display:inline-block;width:45%;border:1px solid #ddd;border-radius:8px;padding:10px;margin:6px;vertical-align:top;">
+      <svg viewBox="0 0 300 170" style="width:100%;height:100px;">${drawPreview(p.kind,'#c9a87c')}</svg>
+      <b>${p.name}</b><br><span style="font-size:12px;color:#666;">${p.desc}</span><br>
+      <span style="color:#b45309;font-weight:bold;">from ${fmt(p.base)}</span><br>
+      <span style="font-size:11px;color:#666;">Sizes: ${p.sizes.map(s=>s[0]).join(' / ')}</span>
+    </div>`).join('');
+  document.getElementById('printCatalog').innerHTML = `
+    <h1 style="color:#5f3d20;">Bangkok Furniture Factory — Catalog (Demo)</h1>
+    <p>Factory-direct · custom sizes & fabrics · Bangkok warehouse stock · Tel/LINE: (your contact)</p>${cards}
+    <p style="font-size:12px;color:#666;">Demo catalog with placeholder products. Production version uses real product photography.</p>`;
+  document.body.classList.add('print-catalog'); window.print(); document.body.classList.remove('print-catalog');
+}
+
+/* ================= CHAT ================= */
+const cannedReplies = [
+  'Great question! For custom sofas we need: your room width, preferred fabric, and style photo. Can you share them?',
+  'For hotel & guesthouse projects we offer free room-furnishing plans — how many rooms is your project?',
+  'Our factory is in Bangkok — you are welcome to visit the showroom. Would you like the location?',
+  'We can usually deliver in-stock office furniture within 7 days in Bangkok. What quantity do you need?',
+];
+let chatIdx=0;
+function toggleChat(){ document.getElementById('chatBox').classList.toggle('open'); }
+function sendChat(){
+  const inp=document.getElementById('chatInput'); const t=inp.value.trim(); if(!t) return;
+  const box=document.getElementById('chatMsgs');
+  box.insertAdjacentHTML('beforeend', `<div class="msg me"></div>`);
+  box.lastElementChild.textContent=t; inp.value='';
+  setTimeout(()=>{ box.insertAdjacentHTML('beforeend', `<div class="msg bot">${cannedReplies[chatIdx++ % cannedReplies.length]}</div>`); box.scrollTop=box.scrollHeight; },600);
+  box.scrollTop=box.scrollHeight;
+}
+
+/* ================= INQUIRY ================= */
+function submitInquiry(e){
+  e.preventDefault();
+  document.getElementById('formOk').style.display='block';
+  document.getElementById('formOk').scrollIntoView({behavior:'smooth',block:'center'});
+  return false;
+}
+
+/* ================= 3D PLANNER ================= */
+let scene, renderer, cam3d, camTop, activeCam, floorMesh, wallA, wallB, items=[], selected=null;
+let roomW=4, roomD=5, viewMode='3d';
+let theta=0.9, phi=1.05, radius=8;
+const canvas = document.getElementById('plannerCanvas');
+const ray = new THREE.Raycaster(), mouseV = new THREE.Vector2();
+const floorPlane = new THREE.Plane(new THREE.Vector3(0,1,0), 0);
+let dragging=false, orbiting=false, lastX=0, lastY=0, dragOffset=new THREE.Vector3();
+
+const ITEM_DEFS = {
+  sofa:     {w:2.0, d:0.9, h:0.8, c:0xc96f4a, label:'Sofa 2.0×0.9m', style:'sofa'},
+  sofaL:    {w:2.8, d:1.6, h:0.8, c:0xb45309, label:'L-Sofa 2.8×1.6m', style:'sofaL'},
+  bed:      {w:1.6, d:2.0, h:0.5, c:0x8ea7c2, label:'Bed 1.6×2.0m', style:'bed'},
+  wardrobe: {w:1.2, d:0.6, h:2.0, c:0x8a5a33, label:'Wardrobe 1.2×0.6m', style:'box'},
+  desk:     {w:1.4, d:0.7, h:0.75, c:0x6b4f2f, label:'Desk 1.4×0.7m', style:'desk'},
+  chair:    {w:0.55,d:0.55,h:0.9, c:0x4a4a4a, label:'Chair 0.55m', style:'box'},
+  table:    {w:1.1, d:0.6, h:0.4, c:0xa9713d, label:'Table 1.1×0.6m', style:'box'},
+  rug:      {w:2.0, d:1.4, h:0.02,c:0xd8c9a8, label:'Rug 2.0×1.4m', style:'flat'},
+};
+
+function initPlanner(){
+  renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xefe9df);
+  cam3d = new THREE.PerspectiveCamera(55, 2, 0.1, 100);
+  camTop = new THREE.OrthographicCamera(-4,4,3,-3,0.1,100);
+  activeCam = cam3d;
+  scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+  const dl = new THREE.DirectionalLight(0xffffff, 0.6); dl.position.set(5,8,3); scene.add(dl);
+  buildRoom();
+  addItem('sofa'); addItem('table');
+  resize(); animate();
+}
+function buildRoom(){
+  roomW = Math.min(12,Math.max(2, parseFloat(document.getElementById('roomW').value)||4));
+  roomD = Math.min(12,Math.max(2, parseFloat(document.getElementById('roomD').value)||5));
+  if(floorMesh){ scene.remove(floorMesh); scene.remove(wallA); scene.remove(wallB); }
+  floorMesh = new THREE.Mesh(new THREE.BoxGeometry(roomW,0.08,roomD), new THREE.MeshLambertMaterial({color:0xcbb490}));
+  floorMesh.position.y = -0.04; scene.add(floorMesh);
+  const wallMat = new THREE.MeshLambertMaterial({color:0xf4efe6});
+  wallA = new THREE.Mesh(new THREE.BoxGeometry(roomW,2.4,0.08), wallMat);
+  wallA.position.set(0,1.2,-roomD/2-0.04); scene.add(wallA);
+  wallB = new THREE.Mesh(new THREE.BoxGeometry(0.08,2.4,roomD), wallMat);
+  wallB.position.set(-roomW/2-0.04,1.2,0); scene.add(wallB);
+  items.forEach(g=>clampToRoom(g));
+  updateTopCam();
+}
+function updateTopCam(){
+  const m = Math.max(roomW, roomD)/2 + 0.8;
+  const aspect = canvas.clientWidth/Math.max(1,canvas.clientHeight);
+  camTop.left=-m*aspect; camTop.right=m*aspect; camTop.top=m; camTop.bottom=-m;
+  camTop.position.set(0,15,0); camTop.up.set(0,0,-1); camTop.lookAt(0,0,0);
+  camTop.updateProjectionMatrix();
+}
+function mkBox(w,h,d,c,x,y,z){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), new THREE.MeshLambertMaterial({color:c}));
+  m.position.set(x,y,z); return m;
+}
+function addItem(type){
+  const t = ITEM_DEFS[type];
+  const g = new THREE.Group();
+  if(t.style==='sofa' || t.style==='sofaL'){
+    g.add(mkBox(t.w, 0.35, t.d, t.c, 0, 0.25, 0));
+    g.add(mkBox(t.w, 0.45, 0.22, t.c, 0, 0.55, -t.d/2+0.11));
+    g.add(mkBox(0.2, 0.5, t.d, t.c, -t.w/2+0.1, 0.4, 0));
+    g.add(mkBox(0.2, 0.5, t.d, t.c,  t.w/2-0.1, 0.4, 0));
+    if(t.style==='sofaL') g.add(mkBox(0.9, 0.35, t.d*0.55, t.c, -t.w/2+0.45, 0.25, t.d/2+t.d*0.27));
+  } else if(t.style==='bed'){
+    g.add(mkBox(t.w, 0.35, t.d, 0xf2ede4, 0, 0.22, 0));
+    g.add(mkBox(t.w, 0.7, 0.12, t.c, 0, 0.4, -t.d/2+0.06));
+    g.add(mkBox(t.w*0.42, 0.1, 0.5, 0xffffff, -t.w*0.22, 0.43, -t.d/2+0.45));
+    g.add(mkBox(t.w*0.42, 0.1, 0.5, 0xffffff,  t.w*0.22, 0.43, -t.d/2+0.45));
+  } else if(t.style==='desk'){
+    g.add(mkBox(t.w, 0.06, t.d, t.c, 0, t.h, 0));
+    g.add(mkBox(0.06, t.h, t.d*0.9, 0x3a2c1c, -t.w/2+0.06, t.h/2, 0));
+    g.add(mkBox(0.06, t.h, t.d*0.9, 0x3a2c1c,  t.w/2-0.06, t.h/2, 0));
+  } else if(t.style==='flat'){
+    g.add(mkBox(t.w, t.h, t.d, t.c, 0, t.h/2, 0));
+  } else {
+    g.add(mkBox(t.w, t.h, t.d, t.c, 0, t.h/2, 0));
+  }
+  g.userData = {def:t};
+  g.position.set((Math.random()-0.5)*(roomW-t.w), 0, (Math.random()-0.5)*(roomD-t.d));
+  scene.add(g); items.push(g); select(g);
+}
+function clampToRoom(g){
+  const t=g.userData.def;
+  const hw=(roomW - Math.max(t.w,t.d))/2, hd=(roomD - Math.max(t.w,t.d))/2;
+  g.position.x = Math.max(-Math.max(0,hw), Math.min(Math.max(0,hw), g.position.x));
+  g.position.z = Math.max(-Math.max(0,hd), Math.min(Math.max(0,hd), g.position.z));
+}
+function select(g){
+  if(selected) setEmissive(selected, 0x000000);
+  selected = g;
+  if(g){ setEmissive(g, 0x7a4a0a); document.getElementById('selInfo').textContent = 'Selected: '+g.userData.def.label; }
+  else document.getElementById('selInfo').textContent = 'Click an item to select · drag to move · drag empty space to orbit';
+}
+function setEmissive(g,c){ g.traverse(o=>{ if(o.isMesh) o.material.emissive = new THREE.Color(c); }); }
+function rotateSel(){ if(selected){ selected.rotation.y += Math.PI/2; } }
+function deleteSel(){
+  if(selected){ scene.remove(selected); items = items.filter(i=>i!==selected); selected=null; select(null); }
+}
+function setView(v){ viewMode=v; activeCam = (v==='top')?camTop:cam3d; if(v==='top') updateTopCam(); }
+function pointerPos(e){
+  const r = canvas.getBoundingClientRect();
+  mouseV.x = ((e.clientX-r.left)/r.width)*2-1;
+  mouseV.y = -((e.clientY-r.top)/r.height)*2+1;
+}
+canvas.addEventListener('pointerdown', e=>{
+  pointerPos(e); ray.setFromCamera(mouseV, activeCam);
+  const hits = ray.intersectObjects(items, true);
+  if(hits.length){
+    let g = hits[0].object; while(g.parent && !items.includes(g)) g = g.parent;
+    select(g); dragging=true;
+    const pt = new THREE.Vector3(); ray.ray.intersectPlane(floorPlane, pt);
+    dragOffset.copy(g.position).sub(pt);
+    canvas.setPointerCapture(e.pointerId);
+  } else if(viewMode==='3d'){ orbiting=true; lastX=e.clientX; lastY=e.clientY; }
+});
+canvas.addEventListener('pointermove', e=>{
+  if(dragging && selected){
+    pointerPos(e); ray.setFromCamera(mouseV, activeCam);
+    const pt = new THREE.Vector3();
+    if(ray.ray.intersectPlane(floorPlane, pt)){
+      selected.position.set(pt.x+dragOffset.x, 0, pt.z+dragOffset.z);
+      clampToRoom(selected);
+    }
+  } else if(orbiting){
+    theta -= (e.clientX-lastX)*0.006; phi -= (e.clientY-lastY)*0.005;
+    phi = Math.max(0.25, Math.min(1.45, phi)); lastX=e.clientX; lastY=e.clientY;
+  }
+});
+window.addEventListener('pointerup', ()=>{ dragging=false; orbiting=false; });
+canvas.addEventListener('wheel', e=>{ e.preventDefault(); radius = Math.max(3, Math.min(20, radius + e.deltaY*0.01)); }, {passive:false});
+function resize(){
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if(canvas.width!==w || canvas.height!==h){
+    renderer.setSize(w,h,false);
+    cam3d.aspect = w/Math.max(1,h); cam3d.updateProjectionMatrix(); updateTopCam();
+  }
+}
+function animate(){
+  requestAnimationFrame(animate); resize();
+  cam3d.position.set(radius*Math.sin(phi)*Math.sin(theta), radius*Math.cos(phi), radius*Math.sin(phi)*Math.cos(theta));
+  cam3d.lookAt(0,0,0);
+  renderer.render(scene, activeCam);
+}
+window.addEventListener('resize', resize);
+
+/* init */
+cfgRender(true); renderCatalog(); initPlanner();
+</script>
+</body>
+</html>
