@@ -59,6 +59,14 @@
   select,.qtyin{padding:8px; border:1px solid var(--line); border-radius:8px; width:100%; background:#fff;}
   .optrow{display:flex; align-items:center; gap:8px; font-size:.9rem; margin:4px 0;}
   .price-big{font-size:1.8rem; font-weight:800; color:var(--wood-dark); margin:12px 0;}
+  .cb-row{display:flex; align-items:center; gap:10px; margin-top:12px;}
+  .cb-row label{font-size:.85rem; color:var(--grey); width:110px; flex-shrink:0; margin:0;}
+  .cb-row input[type=range]{flex:1; accent-color:var(--amber);}
+  .cb-val{font-weight:700; width:74px; text-align:right; color:var(--wood-dark);}
+  .cb-tabs{display:flex; gap:8px; margin-bottom:14px;}
+  .cb-tab{padding:8px 18px; border-radius:999px; border:1.5px solid var(--amber); background:#fff;
+          color:var(--amber); cursor:pointer; font-size:.95rem;}
+  .cb-tab.on{background:var(--amber); color:#fff;}
   #previewBox{background:#fff; border:1px solid var(--line); border-radius:12px; padding:18px; text-align:center;}
   /* QUOTE */
   table{width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;}
@@ -121,6 +129,7 @@
   <span class="logo">🪑 Bangkok Furniture Factory</span>
   <a href="#planner">3D Room Planner</a>
   <a href="#configurator">Customize</a>
+  <a href="#custom">Custom Sofa/Bed</a>
   <a href="#quote">Quotation</a>
   <a href="#catalog">Catalog</a>
   <a href="#inquiry">Project Inquiry</a>
@@ -203,6 +212,49 @@
       <p class="note">B2B pricing: 10+ pieces −10% · 30+ pieces −15% (applied automatically in the quote).</p>
     </div>
   </div>
+  </div>
+</section>
+
+<!-- ============ CUSTOM BUILDER ============ -->
+<section id="custom">
+  <h2>Custom Sofa & Bed Builder — Made to Measure</h2>
+  <p class="sub">Our factory builds to your exact size. Set the dimensions, choose the fabric, and see the price instantly — สั่งทำตามขนาดห้องของคุณ.</p>
+  <div class="config-wrap">
+    <div id="cbPreviewBox" class="panel" style="text-align:center;">
+      <svg id="cbSvg" viewBox="0 0 340 210" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="cbSummary" style="font-size:.9rem; color:var(--grey); margin-top:6px;"></div>
+    </div>
+    <div>
+      <div class="cb-tabs">
+        <button class="cb-tab on" id="cbTabSofa" onclick="cbSetType('sofa')">🛋 Custom Sofa</button>
+        <button class="cb-tab" id="cbTabBed" onclick="cbSetType('bed')">🛏 Custom Bed</button>
+      </div>
+      <div id="cbSofaCtrls">
+        <div class="cb-row"><label>Width</label><input type="range" id="cbSW" min="140" max="320" step="5" value="200" oninput="cbRender()"><span class="cb-val" id="cbSWv"></span></div>
+        <div class="cb-row"><label>Depth</label><input type="range" id="cbSD" min="80" max="160" step="5" value="90" oninput="cbRender()"><span class="cb-val" id="cbSDv"></span></div>
+        <div class="cb-row"><label>Arm style</label>
+          <select id="cbArm" onchange="cbRender()" style="flex:1;"><option value="slim">Slim arm (modern)</option><option value="wide">Wide arm (+฿1,500)</option><option value="none">Armless (−฿800)</option></select></div>
+        <div class="optrow" style="margin-top:10px;"><input type="checkbox" id="cbRecl" onchange="cbRender()"><label for="cbRecl" style="margin:0;color:var(--ink);font-size:.9rem;">Electric recliner mechanism (+฿8,000)</label></div>
+        <div class="optrow"><input type="checkbox" id="cbSofaBed" onchange="cbRender()"><label for="cbSofaBed" style="margin:0;color:var(--ink);font-size:.9rem;">Convert to sofa-bed function (+฿4,500)</label></div>
+      </div>
+      <div id="cbBedCtrls" style="display:none;">
+        <div class="cb-row"><label>Width</label><input type="range" id="cbBW" min="100" max="200" step="1" value="160" oninput="cbRender()"><span class="cb-val" id="cbBWv"></span></div>
+        <div class="cb-row"><label>Length</label><input type="range" id="cbBL" min="190" max="220" step="5" value="200" oninput="cbRender()"><span class="cb-val" id="cbBLv"></span></div>
+        <div class="cb-row"><label>Headboard</label>
+          <select id="cbHead" onchange="cbRender()" style="flex:1;"><option value="high">High upholstered (+฿2,000)</option><option value="low">Low profile</option><option value="none">No headboard (−฿1,200)</option></select></div>
+        <div class="optrow" style="margin-top:10px;"><input type="checkbox" id="cbStor" onchange="cbRender()"><label for="cbStor" style="margin:0;color:var(--ink);font-size:.9rem;">Under-bed storage drawers (+฿2,500)</label></div>
+        <div class="optrow"><input type="checkbox" id="cbUsb" onchange="cbRender()"><label for="cbUsb" style="margin:0;color:var(--ink);font-size:.9rem;">USB headboard charging (+฿900)</label></div>
+      </div>
+      <label style="font-size:.85rem; color:var(--grey); display:block; margin-top:14px;">Fabric / finish</label>
+      <div class="swatches" id="cbSwatches"></div>
+      <div id="cbFabricName" style="font-size:.85rem; color:var(--grey);"></div>
+      <div class="price-big" id="cbPrice"></div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input type="number" id="cbQty" class="qtyin" value="1" min="1" style="width:80px;">
+        <button class="btn" onclick="cbAddToQuote()">Add to quotation →</button>
+      </div>
+      <p class="note">Made-to-measure lead time: ~14–21 days from our Bangkok factory (demo estimate).</p>
+    </div>
   </div>
 </section>
 
@@ -641,8 +693,110 @@ function animate(){
 }
 window.addEventListener('resize', resize);
 
+/* ================= CUSTOM BUILDER ================= */
+let cbType='sofa', cbFab=0;
+function cbSetType(t){
+  cbType=t;
+  document.getElementById('cbTabSofa').classList.toggle('on', t==='sofa');
+  document.getElementById('cbTabBed').classList.toggle('on', t==='bed');
+  document.getElementById('cbSofaCtrls').style.display = t==='sofa'?'block':'none';
+  document.getElementById('cbBedCtrls').style.display = t==='bed'?'block':'none';
+  cbRender();
+}
+function cbCalc(){
+  const fab = FABRICS[cbFab];
+  if(cbType==='sofa'){
+    const w=+document.getElementById('cbSW').value, d=+document.getElementById('cbSD').value;
+    const arm=document.getElementById('cbArm').value;
+    let p = 9900 + Math.max(0,w-140)*75 + Math.max(0,d-80)*60 + fab.mod;
+    if(arm==='wide') p+=1500; if(arm==='none') p-=800;
+    if(document.getElementById('cbRecl').checked) p+=8000;
+    if(document.getElementById('cbSofaBed').checked) p+=4500;
+    return {p, txt:`Custom Sofa ${w}×${d} cm`, spec:`${arm} arm · ${fab.n}`
+      + (document.getElementById('cbRecl').checked?' · recliner':'')
+      + (document.getElementById('cbSofaBed').checked?' · sofa-bed':'')};
+  } else {
+    const w=+document.getElementById('cbBW').value, l=+document.getElementById('cbBL').value;
+    const head=document.getElementById('cbHead').value;
+    let p = 12900 + Math.max(0,w-100)*55 + Math.max(0,l-190)*45 + fab.mod;
+    if(head==='high') p+=2000; if(head==='none') p-=1200;
+    if(document.getElementById('cbStor').checked) p+=2500;
+    if(document.getElementById('cbUsb').checked) p+=900;
+    return {p, txt:`Custom Bed ${w}×${l} cm`, spec:`${head} headboard · ${fab.n}`
+      + (document.getElementById('cbStor').checked?' · storage':'')
+      + (document.getElementById('cbUsb').checked?' · USB':'')};
+  }
+}
+function cbDrawSvg(){
+  const f = FABRICS[cbFab].c, dark='#3a2c1c';
+  let s='';
+  if(cbType==='sofa'){
+    const w=+document.getElementById('cbSW').value, d=+document.getElementById('cbSD').value;
+    const arm=document.getElementById('cbArm').value;
+    const px=Math.min(300, Math.max(110, w*0.9)), X=(340-px)/2;
+    const armW = arm==='none'?0 : arm==='wide'?28:14;
+    const recl=document.getElementById('cbRecl').checked;
+    s += `<rect x="${X}" y="55" width="${px}" height="48" rx="10" fill="${f}" opacity=".85"/>`;
+    s += `<rect x="${X}" y="95" width="${px}" height="42" rx="9" fill="${f}"/>`;
+    if(armW){ s += `<rect x="${X-6}" y="75" width="${armW}" height="64" rx="9" fill="${f}"/>
+                   <rect x="${X+px-armW+6}" y="75" width="${armW}" height="64" rx="9" fill="${f}"/>`; }
+    const seatX=X+armW+4, seatW=px-armW*2-8, cushW=seatW/Math.max(1,Math.round(w/80));
+    for(let i=0;i<Math.max(1,Math.round(w/80));i++)
+      s += `<rect x="${seatX+i*cushW+3}" y="100" width="${cushW-6}" height="30" rx="7" fill="#00000018"/>`;
+    if(recl) s += `<rect x="${seatX}" y="140" width="70" height="16" rx="5" fill="${f}" opacity=".8"/><text x="${seatX+8}" y="152" font-size="9" fill="#fff">recliner</text>`;
+    s += `<rect x="${X+8}" y="137" width="12" height="16" fill="${dark}"/><rect x="${X+px-20}" y="137" width="12" height="16" fill="${dark}"/>`;
+    s += `<line x1="${X}" y1="172" x2="${X+px}" y2="172" stroke="${dark}" stroke-width="1.5"/>
+          <line x1="${X}" y1="166" x2="${X}" y2="178" stroke="${dark}" stroke-width="1.5"/>
+          <line x1="${X+px}" y1="166" x2="${X+px}" y2="178" stroke="${dark}" stroke-width="1.5"/>
+          <text x="170" y="192" font-size="13" text-anchor="middle" fill="${dark}" font-weight="bold">${w} cm</text>
+          <text x="330" y="30" font-size="11" text-anchor="end" fill="#7a6f63">depth ${d} cm</text>`;
+  } else {
+    const w=+document.getElementById('cbBW').value, l=+document.getElementById('cbBL').value;
+    const head=document.getElementById('cbHead').value;
+    const px=Math.min(300, Math.max(110, w*1.35)), X=(340-px)/2;
+    const headH = head==='high'?52 : head==='low'?28 : 0;
+    if(headH) s += `<rect x="${X}" y="${88-headH}" width="${px}" height="${headH}" rx="9" fill="${f}"/>`;
+    s += `<rect x="${X}" y="88" width="${px}" height="46" rx="6" fill="#f2ede4" stroke="${f}" stroke-width="3"/>`;
+    s += `<rect x="${X+10}" y="94" width="${px*0.38}" height="18" rx="6" fill="#fff" stroke="#d9cfc0"/>
+          <rect x="${X+px*0.52}" y="94" width="${px*0.38}" height="18" rx="6" fill="#fff" stroke="#d9cfc0"/>`;
+    s += `<rect x="${X}" y="134" width="${px}" height="14" rx="4" fill="${f}" opacity=".8"/>`;
+    if(document.getElementById('cbStor').checked)
+      s += `<rect x="${X+6}" y="136" width="${px/2-10}" height="10" rx="3" fill="#00000022"/><rect x="${X+px/2+4}" y="136" width="${px/2-10}" height="10" rx="3" fill="#00000022"/>`;
+    s += `<rect x="${X+6}" y="148" width="10" height="12" fill="${dark}"/><rect x="${X+px-16}" y="148" width="10" height="12" fill="${dark}"/>`;
+    s += `<line x1="${X}" y1="172" x2="${X+px}" y2="172" stroke="${dark}" stroke-width="1.5"/>
+          <line x1="${X}" y1="166" x2="${X}" y2="178" stroke="${dark}" stroke-width="1.5"/>
+          <line x1="${X+px}" y1="166" x2="${X+px}" y2="178" stroke="${dark}" stroke-width="1.5"/>
+          <text x="170" y="192" font-size="13" text-anchor="middle" fill="${dark}" font-weight="bold">${w} cm wide</text>
+          <text x="330" y="30" font-size="11" text-anchor="end" fill="#7a6f63">length ${l} cm</text>`;
+  }
+  document.getElementById('cbSvg').innerHTML = s;
+}
+function cbRender(){
+  document.getElementById('cbSWv').textContent = document.getElementById('cbSW').value+' cm';
+  document.getElementById('cbSDv').textContent = document.getElementById('cbSD').value+' cm';
+  document.getElementById('cbBWv').textContent = document.getElementById('cbBW').value+' cm';
+  document.getElementById('cbBLv').textContent = document.getElementById('cbBL').value+' cm';
+  const sw = document.getElementById('cbSwatches'); sw.innerHTML='';
+  FABRICS.forEach((f,i)=>{
+    const d=document.createElement('div'); d.className='swatch'+(i===cbFab?' sel':''); d.style.background=f.c;
+    d.title=f.n; d.onclick=()=>{cbFab=i; cbRender();}; sw.appendChild(d);
+  });
+  document.getElementById('cbFabricName').textContent = FABRICS[cbFab].n + (FABRICS[cbFab].mod? ' (+'+fmt(FABRICS[cbFab].mod)+')':'');
+  const r = cbCalc();
+  document.getElementById('cbPrice').textContent = fmt(r.p);
+  document.getElementById('cbSummary').textContent = r.txt+' · '+r.spec;
+  cbDrawSvg();
+}
+function cbAddToQuote(){
+  const r = cbCalc();
+  const qty = Math.max(1, parseInt(document.getElementById('cbQty').value)||1);
+  quote.push({name:r.txt, spec:r.spec+' · made-to-measure', unit:r.p, qty});
+  renderQuote();
+  document.getElementById('quote').scrollIntoView({behavior:'smooth'});
+}
+
 /* init */
-cfgRender(true); renderCatalog(); initPlanner();
+cfgRender(true); renderCatalog(); cbRender(); initPlanner();
 </script>
 </body>
 </html>
