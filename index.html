@@ -82,6 +82,27 @@
   .cat-card svg{width:100%; height:110px;}
   .cat-card .nm{font-weight:700; margin-top:6px;}
   .cat-card .pr{color:var(--amber); font-weight:700;}
+  /* PROJECTS */
+  .pj-filters{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;}
+  .pj-filter{padding:7px 16px; border-radius:999px; border:1.5px solid var(--line); background:#fff;
+             cursor:pointer; font-size:.88rem; color:var(--ink);}
+  .pj-filter.on{background:var(--wood-dark); color:#fff; border-color:var(--wood-dark);}
+  .pj-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:18px;}
+  .pj-card{background:#fff; border:1px solid var(--line); border-radius:14px; overflow:hidden;
+           transition:box-shadow .2s;}
+  .pj-card:hover{box-shadow:0 6px 20px rgba(0,0,0,.1);}
+  .pj-card svg{width:100%; height:150px; display:block;}
+  .pj-body{padding:14px;}
+  .pj-tag{display:inline-block; font-size:.72rem; font-weight:700; letter-spacing:.03em;
+          background:#f3ead9; color:var(--wood-dark); padding:3px 10px; border-radius:999px; margin-bottom:6px;}
+  .pj-title{font-weight:800; font-size:1.02rem;}
+  .pj-meta{font-size:.8rem; color:var(--grey); margin:4px 0 8px;}
+  .pj-desc{font-size:.86rem; line-height:1.45;}
+  .pj-stats{display:flex; gap:14px; margin-top:10px; border-top:1px solid var(--line); padding-top:10px;}
+  .pj-stats div{font-size:.78rem; color:var(--grey);}
+  .pj-stats b{display:block; font-size:.95rem; color:var(--wood-dark);}
+  .pj-quote{font-size:.83rem; font-style:italic; color:var(--wood-dark); background:var(--cream);
+            border-left:3px solid var(--amber); padding:8px 10px; border-radius:6px; margin-top:10px;}
   /* FORM */
   form .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media(max-width:700px){form .grid2{grid-template-columns:1fr;}}
@@ -132,6 +153,7 @@
   <a href="#custom">Custom Sofa/Bed</a>
   <a href="#quote">Quotation</a>
   <a href="#catalog">Catalog</a>
+  <a href="#projects">Our Projects</a>
   <a href="#inquiry">Project Inquiry</a>
 </nav>
 
@@ -285,6 +307,14 @@
     <button class="btn" onclick="printCatalog()">⬇ Download full catalog (PDF)</button>
   </div>
   </div>
+</section>
+
+<!-- ============ PROJECTS ============ -->
+<section id="projects">
+  <h2>Our Projects</h2>
+  <p class="sub">Selected work delivered by our Bangkok factory — hotels, guesthouses, offices and homes across Thailand. (Demo content: sample projects with placeholder details.)</p>
+  <div class="pj-filters" id="pjFilters"></div>
+  <div class="pj-grid" id="pjGrid"></div>
 </section>
 
 <!-- ============ INQUIRY ============ -->
@@ -795,8 +825,108 @@ function cbAddToQuote(){
   document.getElementById('quote').scrollIntoView({behavior:'smooth'});
 }
 
+/* ================= PROJECTS ================= */
+const PROJECTS_DONE = [
+  {cat:'Hotel & Resort', title:'Boutique Hotel — Sukhumvit, Bangkok', year:'2025', loc:'Bangkok',
+   desc:'Full FF&E for a 42-room boutique hotel: custom headboard beds, upholstered benches, lobby sofas in stain-guard fabric.',
+   pieces:'186 pieces', days:'45 days', value:'฿2.4M', scene:'hotel',
+   quote:'“Delivered every floor on schedule — the custom headboards became our signature look.” — Hotel GM'},
+  {cat:'Hotel & Resort', title:'Beachfront Resort Villas — Hua Hin', year:'2024', loc:'Hua Hin',
+   desc:'24 pool villas furnished with weather-resistant outdoor sets, custom king beds and Italian-minimal sofas.',
+   pieces:'210 pieces', days:'60 days', value:'฿3.1M', scene:'resort',
+   quote:'“One factory for everything — design, production, delivery, installation.” — Project Manager'},
+  {cat:'Guesthouse / Airbnb', title:'12-Room Guesthouse — Old Town, Chiang Mai', year:'2025', loc:'Chiang Mai',
+   desc:'Complete room packages (bed + wardrobe + desk + soft furnishings) at a fixed per-room price for a heritage guesthouse.',
+   pieces:'12 room sets', days:'21 days', value:'฿580K', scene:'guest',
+   quote:'“The fixed per-room package made budgeting simple. Guests always compliment the beds.” — Owner'},
+  {cat:'Guesthouse / Airbnb', title:'Airbnb Portfolio — 8 Condo Units, On Nut', year:'2026', loc:'Bangkok',
+   desc:'Compact sofa-beds and space-saving custom furniture for 30–35 sqm rental condos; all units photo-ready in 2 weeks.',
+   pieces:'64 pieces', days:'14 days', value:'฿420K', scene:'condo',
+   quote:'“Sofa-beds sized exactly to the wall — every square meter earns.” — Host'},
+  {cat:'Office', title:'Tech Company HQ — Rama 9', year:'2025', loc:'Bangkok',
+   desc:'3-floor fit-out: 120 ergonomic workstations, meeting tables, executive suite — delivered from warehouse stock in 7 days.',
+   pieces:'340 pieces', days:'7 days', value:'฿1.8M', scene:'office',
+   quote:'“Seven days from PO to a working office. Warehouse stock is a real advantage.” — Facilities Lead'},
+  {cat:'Office', title:'Law Firm Renovation — Silom', year:'2024', loc:'Bangkok',
+   desc:'Custom walnut-finish desks and client lounge in caramel leather to match existing interior during live renovation.',
+   pieces:'85 pieces', days:'30 days', value:'฿950K', scene:'office2',
+   quote:'“They matched our 20-year-old woodwork perfectly.” — Managing Partner'},
+  {cat:'Home / Condo', title:'Whole-House Package — Private Villa, Nonthaburi', year:'2025', loc:'Nonthaburi',
+   desc:'Free whole-house design service: living, dining, 4 bedrooms — one style, one delivery, one installation day.',
+   pieces:'48 pieces', days:'35 days', value:'฿760K', scene:'villa',
+   quote:'“One team handled everything. We just moved in.” — Homeowner'},
+  {cat:'Home / Condo', title:'Compact Condo Makeover — 35 sqm, Ari', year:'2026', loc:'Bangkok',
+   desc:'Made-to-measure L-sofa (255 cm exact fit), storage bed and fold-away desk for a first-time condo owner.',
+   pieces:'9 pieces', days:'18 days', value:'฿96K', scene:'condo2',
+   quote:'“The sofa fits my wall to the centimeter. Could never buy this ready-made.” — Customer'},
+];
+function pjScene(type){
+  const wall='#efe6d8', floor='#cbb490', a='#c96f4a', b='#8ea7c2', w='#8a5a33', dk='#3a2c1c';
+  let inner='';
+  if(type==='hotel'||type==='guest'){
+    inner=`<rect x="30" y="45" width="110" height="55" rx="4" fill="${type==='hotel'?a:b}"/>
+      <rect x="30" y="72" width="110" height="34" rx="3" fill="#f6f1e7" stroke="#d9cfc0"/>
+      <rect x="150" y="70" width="34" height="36" rx="3" fill="${w}"/>
+      <circle cx="205" cy="52" r="10" fill="#f5d76e"/><rect x="202" y="62" width="6" height="26" fill="${dk}"/>
+      <rect x="225" y="55" width="70" height="52" rx="4" fill="${w}" opacity=".85"/>`;
+  } else if(type==='resort'){
+    inner=`<rect x="25" y="60" width="95" height="45" rx="8" fill="${a}"/>
+      <rect x="135" y="80" width="60" height="26" rx="6" fill="${w}"/>
+      <circle cx="250" cy="45" r="16" fill="#f5d76e"/>
+      <path d="M215 108 q25 -18 50 0 q15 10 30 0 v10 h-80 z" fill="#7fb3c8" opacity=".7"/>`;
+  } else if(type==='office'||type==='office2'){
+    inner=`<rect x="25" y="70" width="80" height="8" fill="${type==='office2'?w:'#9aa5b1'}"/><rect x="30" y="78" width="6" height="28" fill="${dk}"/><rect x="94" y="78" width="6" height="28" fill="${dk}"/>
+      <rect x="42" y="48" width="34" height="22" rx="2" fill="#33415c"/>
+      <rect x="130" y="70" width="80" height="8" fill="${type==='office2'?w:'#9aa5b1'}"/><rect x="135" y="78" width="6" height="28" fill="${dk}"/><rect x="199" y="78" width="6" height="28" fill="${dk}"/>
+      <rect x="147" y="48" width="34" height="22" rx="2" fill="#33415c"/>
+      <rect x="235" y="62" width="46" height="44" rx="8" fill="${type==='office2'?'#a9713d':'#4a4a4a'}"/>`;
+  } else if(type==='villa'){
+    inner=`<rect x="25" y="60" width="100" height="45" rx="8" fill="${a}"/>
+      <rect x="140" y="82" width="55" height="24" rx="5" fill="${w}"/>
+      <rect x="210" y="50" width="80" height="56" rx="4" fill="${b}"/>
+      <rect x="210" y="78" width="80" height="28" rx="3" fill="#f6f1e7" stroke="#d9cfc0"/>`;
+  } else {
+    inner=`<rect x="25" y="62" width="120" height="43" rx="8" fill="${type==='condo2'?a:'#33415c'}"/>
+      <rect x="25" y="62" width="34" height="43" rx="8" fill="${type==='condo2'?a:'#33415c'}" opacity=".7"/>
+      <rect x="160" y="85" width="50" height="20" rx="4" fill="${w}"/>
+      <rect x="230" y="45" width="60" height="60" rx="3" fill="#dce8f0" stroke="#b9c8d4"/>
+      <line x1="260" y1="45" x2="260" y2="105" stroke="#b9c8d4" stroke-width="2"/>`;
+  }
+  return `<svg viewBox="0 0 320 130" xmlns="http://www.w3.org/2000/svg">
+    <rect width="320" height="105" fill="${wall}"/><rect y="105" width="320" height="25" fill="${floor}"/>${inner}</svg>`;
+}
+let pjActive='All';
+function renderProjects(){
+  const cats=['All', ...new Set(PROJECTS_DONE.map(p=>p.cat))];
+  const fb=document.getElementById('pjFilters'); fb.innerHTML='';
+  cats.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='pj-filter'+(c===pjActive?' on':''); btn.textContent=c;
+    btn.onclick=()=>{pjActive=c; renderProjects();};
+    fb.appendChild(btn);
+  });
+  const g=document.getElementById('pjGrid'); g.innerHTML='';
+  PROJECTS_DONE.filter(p=>pjActive==='All'||p.cat===pjActive).forEach(p=>{
+    const d=document.createElement('div'); d.className='pj-card';
+    d.innerHTML=`${pjScene(p.scene)}
+      <div class="pj-body">
+        <span class="pj-tag">${p.cat}</span>
+        <div class="pj-title">${p.title}</div>
+        <div class="pj-meta">📍 ${p.loc} · ${p.year}</div>
+        <div class="pj-desc">${p.desc}</div>
+        <div class="pj-stats">
+          <div><b>${p.pieces}</b>delivered</div>
+          <div><b>${p.days}</b>lead time</div>
+          <div><b>${p.value}</b>project value</div>
+        </div>
+        <div class="pj-quote">${p.quote}</div>
+      </div>`;
+    g.appendChild(d);
+  });
+}
+
 /* init */
-cfgRender(true); renderCatalog(); cbRender(); initPlanner();
+cfgRender(true); renderCatalog(); cbRender(); renderProjects(); initPlanner();
 </script>
 </body>
 </html>
